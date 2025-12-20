@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- iOS Standalone Web App Meta Tags -->
+    <!-- PWA & Standalone Settings -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="FMGE Prep">
@@ -39,6 +42,28 @@
             display: flex;
             flex-direction: column;
         }
+
+        /* --- SPLASH SCREEN --- */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0F2027;
+            z-index: 9999;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: opacity 0.8s ease-out;
+        }
+        #splash-screen.hidden { opacity: 0; pointer-events: none; }
+        
+        .splash-logo {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; font-weight: 800; color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         /* --- Views Container --- */
         #main-view {
@@ -90,7 +115,7 @@
             position: absolute;
             transition: transform 0.1s; /* Fast for drag */
             user-select: none;
-            touch-action: none; /* Critical for custom swipe */
+            touch-action: none;
             transform-origin: 50% 100%;
         }
 
@@ -113,7 +138,7 @@
         /* --- Browse / ToC View --- */
         .scroll-area {
             flex: 1; overflow-y: auto; padding: 20px;
-            padding-bottom: 100px; /* Space for nav */
+            padding-bottom: 100px;
         }
         
         .search-bar {
@@ -186,6 +211,12 @@
     </style>
 </head>
 <body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash-screen">
+    <div class="splash-logo">F</div>
+    <div style="margin-top:20px; color:white; font-weight:600; letter-spacing:1px;">FMGE 2026</div>
+</div>
 
 <!-- Confetti Layer -->
 <canvas id="confetti-canvas"></canvas>
@@ -270,13 +301,15 @@
     const db = [{"id": 0, "q": "ST-elevation in leads II, III, and aVF. Which artery is occluded?", "options": ["LAD", "LCx", "Right Coronary Artery (RCA)", "Left Main"], "correct": "C", "subject": "Medicine", "ansIdx": 2}, {"id": 1, "q": "Tall tented T-waves, K+ 7.2. First step?", "options": ["Insulin + Dextrose", "IV Calcium Gluconate", "Salbutamol", "Dialysis"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 2, "q": "TB patient on ATT, tingling/numbness. Deficiency of?", "options": ["Vit B1", "Vit B3", "Vit B6 (Pyridoxine)", "Vit B12"], "correct": "C", "subject": "Medicine", "ansIdx": 2}, {"id": 3, "q": "Max time window for IV Thrombolysis in stroke?", "options": ["3 hours", "4.5 hours", "6 hours", "12 hours"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 4, "q": "Fruity breath, Kussmaul breathing, Sugar 450. Diagnosis?", "options": ["HHS", "Diabetic Ketoacidosis (DKA)", "Lactic Acidosis", "Hypoglycemia"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 5, "q": "Murmur best heard in left lateral decubitus with bell?", "options": ["Aortic Stenosis", "Mitral Stenosis", "Mitral Regurgitation", "Pulmonary Stenosis"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 6, "q": "Cannon a-waves in JVP. Sign of?", "options": ["AFib", "Complete Heart Block (3rd Degree)", "Tamponade", "TR"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 7, "q": "DOC for hyperthyroidism in 1st trimester pregnancy?", "options": ["Methimazole", "Propylthiouracil (PTU)", "Carbimazole", "Radioactive Iodine"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 8, "q": "Triad of Wernicke's: Confusion, Ataxia, and?", "options": ["Ophthalmoplegia", "Seizures", "Diarrhea", "Dermatitis"], "correct": "A", "subject": "Medicine", "ansIdx": 0}, {"id": 9, "q": "Male, morning back pain improves with exercise, HLA-B27+. Diagnosis?", "options": ["RA", "OA", "Ankylosing Spondylitis", "Psoriatic Arthritis"], "correct": "C", "subject": "Medicine", "ansIdx": 2}, {"id": 10, "q": "Hallmark finding in Nephrotic Syndrome?", "options": ["Hematuria", "Proteinuria (>3.5g/day)", "Hypertension", "Oliguria"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 11, "q": "Thunderclap headache investigation of choice?", "options": ["MRI", "NCCT Head", "LP", "EEG"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 12, "q": "C-ANCA positivity is associated with?", "options": ["Wegener's (GPA)", "Churg-Strauss", "Microscopic Polyangiitis", "SLE"], "correct": "A", "subject": "Medicine", "ansIdx": 0}, {"id": 13, "q": "Most common cause of Community-Acquired Pneumonia?", "options": ["Strep pneumoniae", "Mycoplasma", "Staph aureus", "Klebsiella"], "correct": "A", "subject": "Medicine", "ansIdx": 0}, {"id": 14, "q": "Currant Jelly Sputum is seen in?", "options": ["Pneumococcus", "Klebsiella pneumoniae", "Pseudomonas", "Mycoplasma"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 15, "q": "Anti-tubercular drug causing Red-Green color blindness?", "options": ["Isoniazid", "Rifampicin", "Ethambutol", "Pyrazinamide"], "correct": "C", "subject": "Medicine", "ansIdx": 2}, {"id": 16, "q": "Immediate management of Tension Pneumothorax?", "options": ["Needle Decompression", "Wait for CXR", "Antibiotics", "Intubation"], "correct": "A", "subject": "Medicine", "ansIdx": 0}, {"id": 17, "q": "DOC for absence seizures in a child?", "options": ["Phenytoin", "Carbamazepine", "Ethosuximide", "Gabapentin"], "correct": "C", "subject": "Medicine", "ansIdx": 2}, {"id": 18, "q": "Tram-track appearance on CT Head seen in?", "options": ["Sturge-Weber Syndrome", "Tuberous Sclerosis", "Neurofibromatosis", "VHL"], "correct": "A", "subject": "Medicine", "ansIdx": 0}, {"id": 19, "q": "Beck's Triad: Hypotension, Muffled Sounds, and?", "options": ["Raised JVP", "Bradycardia", "Pulm Edema", "Wheeze"], "correct": "A", "subject": "Medicine", "ansIdx": 0}, {"id": 20, "q": "Scoring system for Acute Pancreatitis severity?", "options": ["Ranson's Criteria", "Child-Pugh", "Gleason", "Wells"], "correct": "A", "subject": "Medicine", "ansIdx": 0}, {"id": 21, "q": "Drug of choice for MRSA?", "options": ["Amoxicillin", "Ceftriaxone", "Vancomycin", "Azithromycin"], "correct": "C", "subject": "Medicine", "ansIdx": 2}, {"id": 22, "q": "Which Hepatitis virus is DNA based?", "options": ["Hep A", "Hep B", "Hep C", "Hep E"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 23, "q": "Rice water stools are characteristic of?", "options": ["Typhoid", "Cholera", "Shigellosis", "Amoebiasis"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 24, "q": "Antidote for Paracetamol poisoning?", "options": ["Atropine", "N-Acetylcysteine (NAC)", "Flumazenil", "Naloxone"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 25, "q": "Serum marker for Hepatocellular Carcinoma?", "options": ["CEA", "CA-125", "Alpha-Fetoprotein (AFP)", "CA 19-9"], "correct": "C", "subject": "Medicine", "ansIdx": 2}, {"id": 26, "q": "Typical ECG finding in Hypokalemia?", "options": ["Tall T", "U waves", "Short QT", "Wide QRS"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 27, "q": "Mask-like face and Pill-rolling tremor seen in?", "options": ["Parkinson's Disease", "Alzheimer's", "Huntington's", "Wilson's"], "correct": "A", "subject": "Medicine", "ansIdx": 0}, {"id": 28, "q": "MC opportunistic infection in HIV in India?", "options": ["PCP", "Tuberculosis", "Candida", "Toxo"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 29, "q": "Drug of choice for Scrub Typhus?", "options": ["Penicillin", "Doxycycline", "Ceftriaxone", "Metronidazole"], "correct": "B", "subject": "Medicine", "ansIdx": 1}, {"id": 30, "q": "GCS: Eyes open to pain (2), Inappropriate words (3), Localizes pain (5). Total?", "options": ["10", "12", "8", "9"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 31, "q": "Most common type of Thyroid Carcinoma?", "options": ["Follicular", "Papillary", "Medullary", "Anaplastic"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 32, "q": "Orphan Annie Eye nuclei are seen in?", "options": ["Papillary Thyroid Ca", "Follicular Ca", "Medullary Ca", "Hashimoto's"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 33, "q": "Fluid resuscitation formula for burns?", "options": ["Parkland Formula", "Rule of Nines", "Holliday-Segar", "Brooke"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 34, "q": "Nerve injured in mid-shaft humerus fracture?", "options": ["Median", "Ulnar", "Radial Nerve", "Axillary"], "correct": "C", "subject": "Surgery", "ansIdx": 2}, {"id": 35, "q": "Investigation of choice for solitary thyroid nodule?", "options": ["USG", "FNAC", "Scan", "CT"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 36, "q": "Bird's Beak appearance on Barium Swallow?", "options": ["Achalasia Cardia", "Ca Esophagus", "GERD", "Zenker's"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 37, "q": "Murphy's Sign is positive in?", "options": ["Appendicitis", "Acute Cholecystitis", "Pancreatitis", "Renal Colic"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 38, "q": "Most common site for Ca Stomach?", "options": ["Fundus", "Body", "Antrum", "Cardia"], "correct": "C", "subject": "Surgery", "ansIdx": 2}, {"id": 39, "q": "Triple Assessment for Breast lump: Clinical, Imaging, and?", "options": ["MRI", "Pathology (FNAC/Biopsy)", "Markers", "PET"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 40, "q": "Hernia medial to inferior epigastric vessels?", "options": ["Direct Inguinal", "Indirect Inguinal", "Femoral", "Spigelian"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 41, "q": "Coffee bean sign on X-ray Abdomen?", "options": ["Sigmoid Volvulus", "Cecal Volvulus", "Intussusception", "Obstruction"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 42, "q": "Management of Tension Pneumothorax is immediate?", "options": ["CXR", "Needle Thoracostomy", "CT", "Intubation"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 43, "q": "Electrolyte abnormality causing Paralytic Ileus?", "options": ["Hyperkalemia", "Hypokalemia", "Hyponatremia", "Hypercalcemia"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 44, "q": "MC cause of Appendicitis in children?", "options": ["Fecalith", "Lymphoid Hyperplasia", "Worms", "Tumor"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 45, "q": "Sausage-shaped mass and Red Currant Jelly stool?", "options": ["Intussusception", "Volvulus", "Meckel's", "Pyloric Stenosis"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 46, "q": "Courvoisier's Law: Palpable, non-tender GB with jaundice is NOT?", "options": ["Ca Head Pancreas", "Periampullary Ca", "Gallstones", "Cholangiocarcinoma"], "correct": "C", "subject": "Surgery", "ansIdx": 2}, {"id": 47, "q": "MC organ injured in blunt abdominal trauma?", "options": ["Liver", "Spleen", "Kidney", "Intestine"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 48, "q": "Best prognostic factor in Breast Carcinoma?", "options": ["Size", "Axillary Lymph Node Status", "Grade", "Receptors"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 49, "q": "Sentinel Loop on X-ray is a sign of?", "options": ["Acute Pancreatitis", "Cholecystitis", "Appendicitis", "Diverticulitis"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 50, "q": "Eburnation of bone is a feature of?", "options": ["RA", "Osteoarthritis", "Gout", "Septic Arthritis"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 51, "q": "MC bone tumor in children?", "options": ["Osteosarcoma", "Ewing's", "Osteochondroma", "Chondrosarcoma"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 52, "q": "Onion peel appearance on X-ray?", "options": ["Osteosarcoma", "Ewing's Sarcoma", "Osteoclastoma", "Multiple Myeloma"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 53, "q": "Trendelenburg test assesses?", "options": ["Varicose Veins", "DVT", "PAD", "Lymphedema"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 54, "q": "Charcot's Triad (Fever, Jaundice, RUQ Pain) seen in?", "options": ["Cholecystitis", "Ascending Cholangitis", "Hepatitis", "Pancreatitis"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 55, "q": "Investigation of choice for Renal Stones?", "options": ["X-ray", "USG", "NCCT KUB", "IVP"], "correct": "C", "subject": "Surgery", "ansIdx": 2}, {"id": 56, "q": "Wilms' Tumor associated with chromosome deletion?", "options": ["11p13", "13q14", "17p", "22q"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 57, "q": "MC complication of peptic ulcer disease?", "options": ["Bleeding", "Perforation", "Obstruction", "Malignancy"], "correct": "A", "subject": "Surgery", "ansIdx": 0}, {"id": 58, "q": "Treatment for Category III dog bite?", "options": ["Vaccine only", "Vaccine + Immunoglobulin", "Observe", "Antibiotics"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 59, "q": "GCS minimum and maximum scores?", "options": ["0-15", "3-15", "1-10", "3-10"], "correct": "B", "subject": "Surgery", "ansIdx": 1}, {"id": 60, "q": "MC cause of Postpartum Hemorrhage (PPH)?", "options": ["Atonic Uterus", "Trauma", "Coagulopathy", "Placenta"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 61, "q": "Drug of choice for AMTSL?", "options": ["Oxytocin", "Methergine", "Carboprost", "Misoprostol"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 62, "q": "Ischial Spines (Station 0) is landmark for?", "options": ["Engagement", "Dilatation", "Flexion", "Lie"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 63, "q": "Partograph Alert Line starts at cervical dilation of?", "options": ["3 cm", "4 cm", "6 cm", "10 cm"], "correct": "B", "subject": "OBG", "ansIdx": 1}, {"id": 64, "q": "Red Degeneration of Fibroid occurs in?", "options": ["Hyaline", "Pregnancy", "Calcific", "Cystic"], "correct": "B", "subject": "OBG", "ansIdx": 1}, {"id": 65, "q": "Snowstorm appearance on USG?", "options": ["Vesicular Mole", "Ectopic", "Abortion", "Fibroid"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 66, "q": "Drug of choice for Eclampsia?", "options": ["Diazepam", "Phenytoin", "Magnesium Sulfate", "Labetalol"], "correct": "C", "subject": "OBG", "ansIdx": 2}, {"id": 67, "q": "Earliest sign of MgSO4 toxicity?", "options": ["Resp Depression", "Loss of Knee Jerk", "Oliguria", "Cardiac Arrest"], "correct": "B", "subject": "OBG", "ansIdx": 1}, {"id": 68, "q": "Screening test of choice for Ca Cervix?", "options": ["Pap Smear", "Colposcopy", "VIA", "Biopsy"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 69, "q": "MC site of Ectopic Pregnancy?", "options": ["Ampulla", "Isthmus", "Fimbria", "Ovary"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 70, "q": "Pearl Index measures?", "options": ["Contraceptive Efficacy", "Fertility", "MMR", "PMR"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 71, "q": "Absolute contraindication for OCPs?", "options": ["History of Thromboembolism", "Dysmenorrhea", "Acne", "PCOD"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 72, "q": "Ideal time for IUCD insertion after delivery?", "options": ["Within 48h or >6wks", "2wks", "3wks", "4wks"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 73, "q": "Strawberry Cervix is seen in?", "options": ["Candida", "Trichomoniasis", "BV", "Gonorrhea"], "correct": "B", "subject": "OBG", "ansIdx": 1}, {"id": 74, "q": "Whiff test positive in?", "options": ["Bacterial Vaginosis", "Candida", "Trichomoniasis", "Chlamydia"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 75, "q": "MC cause of secondary amenorrhea?", "options": ["PCOS", "Pregnancy", "Thyroid", "Prolactinoma"], "correct": "B", "subject": "OBG", "ansIdx": 1}, {"id": 76, "q": "Chocolate Cyst seen in?", "options": ["Endometriosis", "Dermoid", "PCOD", "Serous Cystadenoma"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 77, "q": "Vaccine contraindicated in pregnancy?", "options": ["Tetanus", "Flu", "Rubella", "Hep B"], "correct": "C", "subject": "OBG", "ansIdx": 2}, {"id": 78, "q": "Hormone responsible for ovulation surge?", "options": ["FSH", "LH", "Estrogen", "Progesterone"], "correct": "B", "subject": "OBG", "ansIdx": 1}, {"id": 79, "q": "MC type of ovarian cancer?", "options": ["Serous Cystadenocarcinoma", "Mucinous", "Endometrioid", "Brenner"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 80, "q": "Curd-like/Cottage cheese discharge seen in?", "options": ["Candidiasis", "Trichomoniasis", "BV", "Gonorrhea"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 81, "q": "Late deceleration on CTG indicates?", "options": ["Head compression", "Utero-placental insufficiency", "Cord compression", "Normal"], "correct": "B", "subject": "OBG", "ansIdx": 1}, {"id": 82, "q": "Variable deceleration on CTG indicates?", "options": ["Head compression", "Insufficiency", "Cord compression", "Sleep"], "correct": "C", "subject": "OBG", "ansIdx": 2}, {"id": 83, "q": "Bishop's Score is used for?", "options": ["Inducibility of Labor", "Fetal Well-being", "Gestational Age", "PPH Risk"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 84, "q": "Min number of Antenatal Visits (WHO/GoI)?", "options": ["4", "3", "6", "8"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 85, "q": "Dose of Anti-D Ig for Rh- mom after Rh+ baby?", "options": ["100 mcg", "300 mcg", "500 mcg", "50 mcg"], "correct": "B", "subject": "OBG", "ansIdx": 1}, {"id": 86, "q": "Maneuver for Shoulder Dystocia?", "options": ["McRoberts", "Ritgen", "Leopold", "Valsalva"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 87, "q": "MC cause of VVF in developing countries?", "options": ["Obstructed Labor", "Surgery", "Radiation", "Trauma"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 88, "q": "Twin Peak sign (Lambda) indicates?", "options": ["Dichorionic Diamniotic", "MCDA", "MCMA", "Conjoined"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 89, "q": "Management of molar pregnancy?", "options": ["Suction Evacuation", "Hysterectomy", "Methotrexate", "Induction"], "correct": "A", "subject": "OBG", "ansIdx": 0}, {"id": 90, "q": "Vaccine stored in freezer (-15 to -25C)?", "options": ["DPT", "Polio (OPV)", "Hep B", "Pentavalent"], "correct": "B", "subject": "PSM", "ansIdx": 1}, {"id": 91, "q": "Most heat-sensitive vaccine?", "options": ["OPV", "BCG", "TT", "Hep B"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 92, "q": "Most heat-resistant vaccine?", "options": ["OPV", "Measles", "Tetanus Toxoid (TT)", "DPT"], "correct": "C", "subject": "PSM", "ansIdx": 2}, {"id": 93, "q": "Human Anatomical Waste bag color?", "options": ["Yellow", "Red", "White", "Blue"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 94, "q": "Sharps/Needles container color?", "options": ["Yellow", "Red", "White (Puncture Proof)", "Blue"], "correct": "C", "subject": "PSM", "ansIdx": 2}, {"id": 95, "q": "Plastic waste (IV sets, gloves) bag color?", "options": ["Yellow", "Red", "White", "Blue"], "correct": "B", "subject": "PSM", "ansIdx": 1}, {"id": 96, "q": "Denominator for MMR?", "options": ["Population", "100,000 Live Births", "1,000 Live Births", "Women 15-49"], "correct": "B", "subject": "PSM", "ansIdx": 1}, {"id": 97, "q": "Best indicator of health service effectiveness?", "options": ["IMR", "MMR", "CDR", "Life Expectancy"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 98, "q": "Vit A prophylaxis dose at 9 months?", "options": ["100,000 IU", "200,000 IU", "50,000 IU", "10,000 IU"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 99, "q": "Koplik's Spots seen in?", "options": ["Measles", "Chickenpox", "Rubella", "Mumps"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 100, "q": "Vector for Dengue/Chikungunya?", "options": ["Aedes aegypti", "Anopheles", "Culex", "Mansonia"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 101, "q": "Vector for Japanese Encephalitis?", "options": ["Aedes", "Anopheles", "Culex tritaeniorhynchus", "Sandfly"], "correct": "C", "subject": "PSM", "ansIdx": 2}, {"id": 102, "q": "Vector for Kala-Azar?", "options": ["Sandfly", "Tsetse", "Housefly", "Mosquito"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 103, "q": "Step-ladder fever pattern seen in?", "options": ["Malaria", "Typhoid", "Dengue", "Pneumonia"], "correct": "B", "subject": "PSM", "ansIdx": 1}, {"id": 104, "q": "Study design: Effect to Cause?", "options": ["Cohort", "Case-Control", "RCT", "Cross-sectional"], "correct": "B", "subject": "PSM", "ansIdx": 1}, {"id": 105, "q": "Relative Risk (RR) calculated in?", "options": ["Cohort", "Case-Control", "Cross-sectional", "Ecological"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 106, "q": "Odds Ratio (OR) calculated in?", "options": ["Cohort", "Case-Control", "RCT", "Ecological"], "correct": "B", "subject": "PSM", "ansIdx": 1}, {"id": 107, "q": "Which is a Live vaccine?", "options": ["BCG", "DPT", "Hep B", "IPV"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 108, "q": "Shake test checks for?", "options": ["Potency", "Frozen damage", "Contamination", "VVM"], "correct": "B", "subject": "PSM", "ansIdx": 1}, {"id": 109, "q": "Vision 2020 goal for blindness prevalence?", "options": ["1%", "0.3%", "0.5%", "0.1%"], "correct": "B", "subject": "PSM", "ansIdx": 1}, {"id": 110, "q": "MC cause of blindness in India?", "options": ["Refractive Error", "Cataract", "Glaucoma", "Vit A def"], "correct": "B", "subject": "PSM", "ansIdx": 1}, {"id": 111, "q": "3 Ds of Pellagra: Dermatitis, Diarrhea, and?", "options": ["Dementia", "Death", "Deafness", "Dysphagia"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 112, "q": "Pellagra is deficiency of?", "options": ["Thiamine", "Riboflavin", "Niacin (B3)", "Pyridoxine"], "correct": "C", "subject": "PSM", "ansIdx": 2}, {"id": 113, "q": "IDD control program monitors?", "options": ["Urine Iodine & TSH", "Serum Iodine", "Thyroid size", "Goiter"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 114, "q": "Incubation period of Measles?", "options": ["10-14 days", "2-3 days", "20-30 days", "1-2 days"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 115, "q": "Herd Immunity not applicable for?", "options": ["Polio", "Measles", "Tetanus", "Diphtheria"], "correct": "C", "subject": "PSM", "ansIdx": 2}, {"id": 116, "q": "JSY promotes?", "options": ["Institutional Deliveries", "Family Planning", "Adolescent Health", "Nutrition"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 117, "q": "ASHA worker is at which level?", "options": ["Village (1/1000)", "Sub-center", "PHC", "CHC"], "correct": "A", "subject": "PSM", "ansIdx": 0}, {"id": 118, "q": "Quarantine is applied to?", "options": ["Infected", "Healthy contacts", "Animals", "Vectors"], "correct": "B", "subject": "PSM", "ansIdx": 1}, {"id": 119, "q": "Isolation is applied to?", "options": ["Cases (Infected)", "Healthy contacts", "Travelers", "Immune"], "correct": "A", "subject": "PSM", "ansIdx": 0}];
     let activeQueue = [];
     let mastered = JSON.parse(localStorage.getItem('fmge_mastered_v4') || '[]');
-    let skipped = []; // Runtime only
-    
+    let skipped = []; 
+
     // --- INIT ---
     function init() {
-        // Reset Queue logic: 
-        // 1. Filter out mastered
-        // 2. Shuffle
+        // Splash Screen Logic
+        setTimeout(() => {
+            document.getElementById('splash-screen').classList.add('hidden');
+        }, 1500);
+
         activeQueue = db.filter(q => !mastered.includes(q.id));
         activeQueue.sort(() => Math.random() - 0.5);
         
@@ -295,19 +328,17 @@
             return;
         }
 
-        const q = activeQueue[0]; // Top card
+        const q = activeQueue[0];
         const card = document.createElement('div');
         card.className = 'card';
         card.id = 'active-card';
         
-        // Touch Events
+        // Events
         card.addEventListener('touchstart', handleTouchStart, false);
         card.addEventListener('touchmove', handleTouchMove, false);
         card.addEventListener('touchend', handleTouchEnd, false);
-        // Mouse Events (Desktop)
         card.addEventListener('mousedown', handleTouchStart, false);
         
-        // Status overlays
         const masterBadge = document.createElement('div');
         masterBadge.className = 'swipe-status status-master';
         masterBadge.innerText = 'MASTERED';
@@ -363,7 +394,6 @@
             const rotate = currentX * 0.05;
             card.style.transform = `translateX(${currentX}px) rotate(${rotate}deg)`;
             
-            // Opacity of badges
             const masterOpacity = Math.max(0, currentX / 100);
             const skipOpacity = Math.max(0, -currentX / 100);
             
@@ -378,51 +408,41 @@
         if(!card) return;
         
         card.style.transition = 'transform 0.3s ease';
-        const threshold = 100; // px to trigger swipe
+        const threshold = 100;
 
         if (currentX > threshold) {
-            // Swiped Right (Master)
             card.style.transform = `translateX(1000px) rotate(30deg)`;
             setTimeout(() => processSwipe('master'), 200);
         } else if (currentX < -threshold) {
-            // Swiped Left (Skip)
             card.style.transform = `translateX(-1000px) rotate(-30deg)`;
             setTimeout(() => processSwipe('skip'), 200);
         } else {
-            // Reset
             card.style.transform = 'translateX(0) rotate(0)';
             card.querySelector('.status-master').style.opacity = 0;
             card.querySelector('.status-skip').style.opacity = 0;
         }
         
-        // Remove mouse listener
         if(e.type.includes('mouse')) document.removeEventListener('mousemove', handleTouchMove);
     }
     
-    // Add Mouse Up listener globally for desktop drag
-    document.addEventListener('mouseup', (e) => {
-        if(isDragging) handleTouchEnd(e);
-    });
-    document.addEventListener('mousemove', (e) => {
-        if(isDragging) handleTouchMove(e);
-    });
+    document.addEventListener('mouseup', (e) => { if(isDragging) handleTouchEnd(e); });
+    document.addEventListener('mousemove', (e) => { if(isDragging) handleTouchMove(e); });
 
 
     function processSwipe(action) {
-        const q = activeQueue.shift(); // Remove from top
+        const q = activeQueue.shift();
         
         if (action === 'master') {
             mastered.push(q.id);
             localStorage.setItem('fmge_mastered_v4', JSON.stringify(mastered));
             triggerConfetti();
         } else {
-            // Re-add to end of queue or keep in queue
             activeQueue.push(q);
         }
         
         renderTopCard();
         updateStats();
-        renderBrowse(); // Refresh status dots
+        renderBrowse();
     }
 
     // --- BROWSE & SEARCH ---
@@ -438,25 +458,19 @@
         for(const [subj, qs] of Object.entries(subjects)) {
             const group = document.createElement('div');
             group.className = 'subject-group';
-            
             let html = `<div class="subject-header"><span>${subj}</span> <span>${qs.length} Qs</span></div>`;
-            
             qs.forEach(q => {
                 const isMastered = mastered.includes(q.id);
                 const statusClass = isMastered ? 'mastered' : 'skipped';
-                
                 html += `
                 <div class="q-list-item" onclick="openModal(${q.id})">
                     <div style="flex:1;">${q.q}</div>
                     <div class="status-dot ${statusClass}"></div>
                 </div>`;
             });
-            
             group.innerHTML = html;
             list.appendChild(group);
         }
-        
-        // Render Profile List too
         renderProfileList();
     }
 
@@ -469,22 +483,20 @@
         });
     }
 
-    // --- MODAL (REVIEW MODE) ---
+    // --- MODAL ---
     function openModal(id) {
         const q = db.find(x => x.id === id);
         const modal = document.getElementById('modal-overlay');
-        modal.innerHTML = ''; // Clear prev
+        modal.innerHTML = '';
         
         const card = document.createElement('div');
         card.className = 'card';
-        card.style.position = 'relative'; // Reset absolute
+        card.style.position = 'relative';
         card.style.transform = 'none';
-        card.onclick = (e) => e.stopPropagation(); // Don't close when clicking card
+        card.onclick = (e) => e.stopPropagation();
         
         let html = `<div class="question">${q.q}</div><div class="options">`;
         q.options.forEach((opt, i) => {
-            let cls = '';
-            // If in review mode, maybe show answer immediately? No, let user tap.
             html += `<button class="opt-btn" onclick="revealAnswer(this, ${i}, ${q.ansIdx})">${opt}</button>`;
         });
         html += `</div>`;
@@ -501,15 +513,12 @@
         }
     }
 
-    // --- PROFILE & STATS ---
+    // --- PROFILE ---
     function renderProfileList() {
         const list = document.getElementById('mastered-history-list');
         list.innerHTML = '';
-        
         const mList = db.filter(q => mastered.includes(q.id));
-        
         if(mList.length === 0) list.innerHTML = '<div style="opacity:0.5; text-align:center;">No cards mastered yet.</div>';
-        
         mList.forEach(q => {
             list.innerHTML += `
             <div class="q-list-item" onclick="openModal(${q.id})">
@@ -536,42 +545,28 @@
     function switchTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + tabName).classList.add('active');
-        
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        // Find the nav item that clicked (simplification)
         const items = document.querySelectorAll('.nav-item');
         if(tabName === 'cards') items[0].classList.add('active');
         if(tabName === 'browse') items[1].classList.add('active');
         if(tabName === 'profile') items[2].classList.add('active');
     }
 
-    // --- CONFETTI (Simple) ---
+    // --- CONFETTI ---
     function triggerConfetti() {
         const canvas = document.getElementById('confetti-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        
         const pieces = [];
         for(let i=0; i<50; i++) {
-            pieces.push({
-                x: canvas.width/2, y: canvas.height/2,
-                vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10,
-                color: `hsl(${Math.random()*360}, 100%, 50%)`,
-                life: 100
-            });
+            pieces.push({ x: canvas.width/2, y: canvas.height/2, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, color: `hsl(${Math.random()*360}, 100%, 50%)`, life: 100 });
         }
-        
         function animate() {
             ctx.clearRect(0,0,canvas.width,canvas.height);
             let active = false;
             pieces.forEach(p => {
-                if(p.life > 0) {
-                    active = true;
-                    p.x += p.vx; p.y += p.vy; p.life--;
-                    ctx.fillStyle = p.color;
-                    ctx.fillRect(p.x, p.y, 5, 5);
-                }
+                if(p.life > 0) { active = true; p.x += p.vx; p.y += p.vy; p.life--; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 5, 5); }
             });
             if(active) requestAnimationFrame(animate);
         }
