@@ -23,7 +23,7 @@
             --success: #00b09b;
             --error: #e74c3c;
             --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --nav-height: 80px; /* Taller nav for better touch targets */
+            --nav-height: 80px;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -34,7 +34,7 @@
             font-family: var(--font-main);
             margin: 0; padding: 0;
             width: 100vw;
-            height: 100dvh; /* Dynamic Height for iOS */
+            height: 100dvh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -42,7 +42,7 @@
 
         /* --- Views Container --- */
         #main-view {
-            flex: 1; /* Takes all available space between header and nav */
+            flex: 1;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -70,10 +70,10 @@
         }
         .header-title { font-weight: 700; font-size: 18px; }
 
-        /* --- CARD VIEW (Flex Centering Fix) --- */
+        /* --- CARD VIEW --- */
         #stack-container {
-            flex: 1; /* Fills space between header and controls */
-            display: flex; /* Flexbox is safer than Grid for centering on iOS */
+            flex: 1;
+            display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -83,7 +83,6 @@
 
         .card {
             width: 100%; max-width: 380px;
-            /* Adaptive height logic */
             height: auto;
             max-height: 60vh; 
             aspect-ratio: 3/4.5;
@@ -98,7 +97,6 @@
             display: flex; flex-direction: column;
             padding: 24px;
             
-            /* No absolute positioning! This fixes the off-center bug */
             position: relative; 
             transform: scale(1);
             transition: transform 0.3s ease, opacity 0.3s ease;
@@ -126,10 +124,10 @@
         .fade-in { animation: fadeIn 0.4s ease backwards; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        /* --- CONTROLS (Fixed Height) --- */
+        /* --- CONTROLS --- */
         #controls {
             height: 90px;
-            flex-shrink: 0; /* Prevents it from disappearing */
+            flex-shrink: 0;
             display: flex; justify-content: center; gap: 20px; align-items: center;
             padding-bottom: 10px;
             z-index: 101;
@@ -143,7 +141,7 @@
         }
         .btn-master { background: rgba(48, 209, 88, 0.2); color: #30d158; border: 1px solid rgba(48, 209, 88, 0.3); }
 
-        /* --- BROWSE TAB --- */
+        /* --- BROWSE & LISTS --- */
         .scroll-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
         .search-bar {
             width: 100%; padding: 12px; background: rgba(255,255,255,0.1);
@@ -152,13 +150,15 @@
         }
         .subject-group { margin-bottom: 20px; }
         .subject-header { font-size: 14px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
+        
         .q-list-item {
             background: var(--glass-bg); border-bottom: 1px solid rgba(255,255,255,0.05);
             padding: 15px; display: flex; align-items: center; justify-content: space-between; font-size: 14px;
         }
         .q-list-item:first-child { border-top-left-radius: 12px; border-top-right-radius: 12px; }
         .q-list-item:last-child { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; border-bottom: none; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+        
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #555; flex-shrink: 0; }
         .status-dot.mastered { background: var(--success); }
 
         /* --- BOTTOM NAV --- */
@@ -236,6 +236,12 @@
                 <div style="font-size:12px; font-weight:600; opacity:0.7;">LEFT</div>
             </div>
         </div>
+        
+        <h3 style="margin-bottom:10px; margin-top:0;">Mastered Questions</h3>
+        <div id="mastered-list" style="margin-bottom:30px;">
+            <!-- Mastered List Injected Here -->
+        </div>
+
         <button onclick="resetAll()" style="width:100%; padding:15px; background:var(--error); border:none; border-radius:12px; color:white;">Reset Progress</button>
     </div>
 </div>
@@ -409,10 +415,11 @@ function init() {
     activeQueue.sort(() => Math.random() - 0.5);
     renderCard();
     renderBrowse();
+    renderProfileList(); // Initial render
     updateStats();
 }
 
-// --- CARD RENDERING (NO LISTENERS) ---
+// --- CARD RENDERING ---
 function renderCard() {
     const stack = document.getElementById('stack-container');
     stack.innerHTML = '';
@@ -429,8 +436,6 @@ function renderCard() {
     const card = document.createElement('div');
     card.className = 'card fade-in';
     card.id = 'active-card';
-    
-    // NOTE: No touchstart/move listeners here!
     
     let html = `
         <div class="question">${q.q}</div>
@@ -463,12 +468,11 @@ function checkAnswer(btn, selected, correct) {
     }
 }
 
-// --- BUTTON NAVIGATION ONLY ---
+// --- BUTTON NAVIGATION ---
 function triggerNext(action) {
     const card = document.getElementById('active-card');
     if(!card) return;
     
-    // Add visual class
     if(action === 'master') card.classList.add('slide-out-right');
     else card.classList.add('slide-out-left');
     
@@ -480,13 +484,14 @@ function triggerNext(action) {
             localStorage.setItem('fmge_mastered_ultimate', JSON.stringify(mastered));
             triggerConfetti();
         } else {
-            activeQueue.push(q); // Re-queue
+            activeQueue.push(q);
         }
         
         renderCard();
         updateStats();
         renderBrowse();
-    }, 300); // Wait for animation
+        renderProfileList(); // Update profile list
+    }, 300);
 }
 
 // --- BROWSE TAB ---
@@ -522,6 +527,29 @@ function filterBrowse(val) {
     });
 }
 
+// --- PROFILE TAB (ADDED) ---
+function renderProfileList() {
+    const list = document.getElementById('mastered-list');
+    list.innerHTML = '';
+    
+    const mList = db.filter(q => mastered.includes(q.id));
+    
+    if(mList.length === 0) {
+        list.innerHTML = '<div style="opacity:0.5; text-align:center; padding:20px; font-size:14px;">No cards mastered yet.</div>';
+        return;
+    }
+    
+    // Show most recently mastered at the bottom (or top if reversed)
+    // Let's just list them
+    mList.forEach(q => {
+        list.innerHTML += `
+        <div class="q-list-item" onclick="openModal(${q.id})">
+            <div style="flex:1; margin-right:10px;">${q.q}</div>
+            <div class="status-dot mastered"></div>
+        </div>`;
+    });
+}
+
 // --- MODAL ---
 function openModal(id) {
     const q = db.find(x => x.id === id);
@@ -532,7 +560,6 @@ function openModal(id) {
         <div class="question">${q.q}</div>
         <div class="options">`;
     q.options.forEach((opt, i) => {
-        // In review mode, show answer immediately? Or let them tap? Let's let them tap.
         html += `<button class="btn" onclick="checkAnswer(this, ${i}, ${q.ansIdx})">${opt}</button>`;
     });
     html += `</div><div style="margin-top:15px; text-align:center; font-size:12px; opacity:0.5;">Tap outside to close</div></div>`;
@@ -568,7 +595,10 @@ function switchTab(tab) {
     const items = document.querySelectorAll('.nav-item');
     if(tab==='cards') items[0].classList.add('active');
     if(tab==='browse') items[1].classList.add('active');
-    if(tab==='profile') items[2].classList.add('active');
+    if(tab==='profile') {
+        items[2].classList.add('active');
+        renderProfileList(); // Refresh when opening tab
+    }
 }
 
 // --- CONFETTI ---
