@@ -22,6 +22,7 @@
             --accent: #4CA1AF;
             --success: #00b09b;
             --error: #e74c3c;
+            --warning: #f39c12;
             --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             --nav-height: 80px;
         }
@@ -188,6 +189,16 @@
             padding: 20px;
         }
         #modal-overlay.open { display: flex; }
+
+        /* Return Button */
+        .btn-unmaster {
+            width: 100%; margin-top: 15px; padding: 14px;
+            background: rgba(243, 156, 18, 0.2); 
+            border: 1px solid rgba(243, 156, 18, 0.4);
+            color: #f39c12; border-radius: 12px; font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-unmaster:active { background: rgba(243, 156, 18, 0.4); }
 
         #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 500; }
     </style>
@@ -415,7 +426,7 @@ function init() {
     activeQueue.sort(() => Math.random() - 0.5);
     renderCard();
     renderBrowse();
-    renderProfileList(); // Initial render
+    renderProfileList();
     updateStats();
 }
 
@@ -527,7 +538,7 @@ function filterBrowse(val) {
     });
 }
 
-// --- PROFILE TAB (ADDED) ---
+// --- PROFILE TAB ---
 function renderProfileList() {
     const list = document.getElementById('mastered-list');
     list.innerHTML = '';
@@ -539,8 +550,6 @@ function renderProfileList() {
         return;
     }
     
-    // Show most recently mastered at the bottom (or top if reversed)
-    // Let's just list them
     mList.forEach(q => {
         list.innerHTML += `
         <div class="q-list-item" onclick="openModal(${q.id})">
@@ -550,10 +559,11 @@ function renderProfileList() {
     });
 }
 
-// --- MODAL ---
+// --- MODAL & UNMASTER LOGIC ---
 function openModal(id) {
     const q = db.find(x => x.id === id);
     const modal = document.getElementById('modal-overlay');
+    const isMastered = mastered.includes(id);
     
     let html = `
     <div class="card" onclick="event.stopPropagation()">
@@ -562,10 +572,38 @@ function openModal(id) {
     q.options.forEach((opt, i) => {
         html += `<button class="btn" onclick="checkAnswer(this, ${i}, ${q.ansIdx})">${opt}</button>`;
     });
+    
+    // Add Return to Deck button if mastered
+    if(isMastered) {
+        html += `<button class="btn-unmaster" onclick="unmaster(${id})">↺ Return to Deck</button>`;
+    }
+    
     html += `</div><div style="margin-top:15px; text-align:center; font-size:12px; opacity:0.5;">Tap outside to close</div></div>`;
     
     modal.innerHTML = html;
     modal.classList.add('open');
+}
+
+function unmaster(id) {
+    // 1. Remove from Mastered List
+    mastered = mastered.filter(x => x !== id);
+    localStorage.setItem('fmge_mastered_ultimate', JSON.stringify(mastered));
+    
+    // 2. Add to TOP of active queue (immediate review)
+    const q = db.find(x => x.id === id);
+    if(q) activeQueue.unshift(q);
+    
+    // 3. Close Modal (Forcefully)
+    document.getElementById('modal-overlay').classList.remove('open');
+    
+    // 4. Update UI
+    updateStats();
+    renderBrowse();
+    renderProfileList();
+    renderCard(); // Re-render card stack to show new card
+    
+    // 5. AUTO SWITCH to Cards Tab so user sees it
+    switchTab('cards');
 }
 
 function closeModal(e) {
