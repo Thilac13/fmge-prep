@@ -2,55 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- iOS Standalone Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FMGE Prep">
+    
     <title>FMGE Dashboard</title>
     <style>
+        :root {
+            --bg-grad-start: #0F2027;
+            --bg-grad-mid: #203A43;
+            --bg-grad-end: #2C5364;
+            --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #000;
+            font-family: var(--font-main);
+            background: linear-gradient(135deg, var(--bg-grad-start), var(--bg-grad-mid), var(--bg-grad-end));
             color: #fff;
-            margin: 0;
-            padding: 20px;
+            margin: 0; padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
         }
-        h1 { margin-bottom: 40px; font-weight: 800; }
+        h1 { margin-bottom: 40px; font-weight: 800; letter-spacing: -1px; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .menu-item {
-            background: #1c1c1e;
-            width: 100%;
-            max-width: 350px;
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            width: 100%; max-width: 350px;
+            padding: 24px;
             margin-bottom: 20px;
-            border-radius: 16px;
+            border-radius: 20px;
             text-decoration: none;
             color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
             transition: transform 0.2s;
         }
-        .menu-item:active { transform: scale(0.98); background: #2c2c2e; }
-        .icon { font-size: 24px; margin-right: 15px; }
+        .menu-item:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.2); }
+        .icon { font-size: 28px; margin-right: 20px; }
         .title { font-size: 18px; font-weight: 600; flex-grow: 1; }
-        .arrow { color: #555; }
+        .arrow { color: rgba(255,255,255,0.5); font-size: 20px; }
     </style>
 </head>
 <body>
 
     <h1>FMGE 2026 🇮🇳</h1>
 
-    <!-- Link to the Tracker File -->
     <a href="tracker.html" class="menu-item">
         <span class="icon">📅</span>
         <span class="title">Study Tracker</span>
         <span class="arrow">›</span>
     </a>
 
-    <!-- Link to the Flashcard App File -->
     <a href="app.html" class="menu-item">
         <span class="icon">🧠</span>
         <span class="title">Revision Cards</span>
