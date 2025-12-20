@@ -23,7 +23,7 @@
             --success: #00b09b;
             --error: #e74c3c;
             --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --nav-height: 70px;
+            --nav-height: 80px; /* Taller nav for better touch targets */
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -33,8 +33,8 @@
             color: var(--text);
             font-family: var(--font-main);
             margin: 0; padding: 0;
-            height: 100vh;
             width: 100vw;
+            height: 100dvh; /* Dynamic Height for iOS */
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -42,9 +42,11 @@
 
         /* --- Views Container --- */
         #main-view {
-            flex: 1;
+            flex: 1; /* Takes all available space between header and nav */
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .tab-content {
@@ -68,20 +70,23 @@
         }
         .header-title { font-weight: 700; font-size: 18px; }
 
-        /* --- CARD VIEW (Centered) --- */
+        /* --- CARD VIEW (Flex Centering Fix) --- */
         #stack-container {
-            flex: 1;
-            display: grid; place-items: center;
-            position: relative;
+            flex: 1; /* Fills space between header and controls */
+            display: flex; /* Flexbox is safer than Grid for centering on iOS */
+            justify-content: center;
+            align-items: center;
             padding: 20px;
-            perspective: 1000px;
+            overflow: hidden;
+            position: relative;
         }
 
         .card {
-            grid-area: 1 / 1;
             width: 100%; max-width: 380px;
-            aspect-ratio: 3/4.6;
-            max-height: 70vh;
+            /* Adaptive height logic */
+            height: auto;
+            max-height: 60vh; 
+            aspect-ratio: 3/4.5;
             
             background: var(--glass-bg);
             backdrop-filter: blur(25px);
@@ -93,17 +98,17 @@
             display: flex; flex-direction: column;
             padding: 24px;
             
-            position: absolute;
-            transform-origin: 50% 100%; 
+            /* No absolute positioning! This fixes the off-center bug */
+            position: relative; 
+            transform: scale(1);
             transition: transform 0.3s ease, opacity 0.3s ease;
-            user-select: none;
         }
 
         .question {
             font-size: 19px; font-weight: 700; line-height: 1.4;
             margin-bottom: 20px; flex-shrink: 0;
         }
-        .options { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+        .options { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex-grow: 1;}
         
         .btn {
             padding: 16px; background: rgba(255,255,255,0.07);
@@ -115,17 +120,19 @@
         .btn.correct { background: var(--success) !important; color: #fff; border: none; opacity: 1 !important; }
         .btn.wrong { background: var(--error) !important; color: #fff; border: none; opacity: 1 !important; }
 
-        /* Animation Classes for Button Clicks */
+        /* Animation Classes */
         .slide-out-left { transform: translateX(-120%) rotate(-15deg) !important; opacity: 0 !important; }
         .slide-out-right { transform: translateX(120%) rotate(15deg) !important; opacity: 0 !important; }
         .fade-in { animation: fadeIn 0.4s ease backwards; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        /* --- CONTROLS --- */
+        /* --- CONTROLS (Fixed Height) --- */
         #controls {
             height: 90px;
-            padding-bottom: 20px;
+            flex-shrink: 0; /* Prevents it from disappearing */
             display: flex; justify-content: center; gap: 20px; align-items: center;
+            padding-bottom: 10px;
+            z-index: 101;
         }
         .ctrl-btn {
             background: rgba(255,255,255,0.1); border: none; color: #fff;
@@ -134,7 +141,6 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .ctrl-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
         .btn-master { background: rgba(48, 209, 88, 0.2); color: #30d158; border: 1px solid rgba(48, 209, 88, 0.3); }
 
         /* --- BROWSE TAB --- */
@@ -162,8 +168,8 @@
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255,255,255,0.1);
             display: flex; justify-content: space-around; align-items: center;
-            position: absolute; bottom: 0; width: 100%;
             padding-bottom: env(safe-area-inset-bottom);
+            flex-shrink: 0;
             z-index: 200;
         }
         .nav-item {
@@ -179,6 +185,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 300;
             display: none; align-items: center; justify-content: center;
+            padding: 20px;
         }
         #modal-overlay.open { display: flex; }
 
@@ -189,48 +196,47 @@
 
 <canvas id="confetti-canvas"></canvas>
 
-<div id="main-view">
+<!-- TAB 1: CARDS -->
+<div id="tab-cards" class="tab-content active">
+    <header>
+        <div class="header-title">Cards</div>
+        <div id="queue-count" style="font-size: 12px; opacity: 0.7;">0 Left</div>
+    </header>
     
-    <!-- TAB 1: CARDS -->
-    <div id="tab-cards" class="tab-content active">
-        <header>
-            <div class="header-title">Cards</div>
-            <div id="queue-count" style="font-size: 12px; opacity: 0.7;">0 Left</div>
-        </header>
-        <div id="stack-container">
-            <!-- Cards Injected via JS -->
-        </div>
-        <div id="controls">
-            <button class="ctrl-btn" onclick="triggerNext('skip')">Skip</button>
-            <button class="ctrl-btn btn-master" onclick="triggerNext('master')">Mastered</button>
-        </div>
+    <div id="stack-container">
+        <!-- Cards Injected via JS -->
     </div>
-
-    <!-- TAB 2: BROWSE -->
-    <div id="tab-browse" class="tab-content">
-        <header><div class="header-title">Browse Topics</div></header>
-        <div class="scroll-area">
-            <input type="text" class="search-bar" placeholder="Search questions..." onkeyup="filterBrowse(this.value)">
-            <div id="browse-list"></div>
-        </div>
+    
+    <div id="controls">
+        <button class="ctrl-btn" onclick="triggerNext('skip')">Skip</button>
+        <button class="ctrl-btn btn-master" onclick="triggerNext('master')">Mastered</button>
     </div>
+</div>
 
-    <!-- TAB 3: PROFILE -->
-    <div id="tab-profile" class="tab-content">
-        <header><div class="header-title">My Progress</div></header>
-        <div class="scroll-area">
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <div style="flex:1; background:var(--success); padding:20px; border-radius:16px; text-align:center; color:#000;">
-                    <div style="font-size:32px; font-weight:800;" id="stat-mastered">0</div>
-                    <div style="font-size:12px; font-weight:600;">MASTERED</div>
-                </div>
-                <div style="flex:1; background:#333; padding:20px; border-radius:16px; text-align:center;">
-                    <div style="font-size:32px; font-weight:800;" id="stat-left">0</div>
-                    <div style="font-size:12px; font-weight:600; opacity:0.7;">LEFT</div>
-                </div>
+<!-- TAB 2: BROWSE -->
+<div id="tab-browse" class="tab-content">
+    <header><div class="header-title">Browse Topics</div></header>
+    <div class="scroll-area">
+        <input type="text" class="search-bar" placeholder="Search questions..." onkeyup="filterBrowse(this.value)">
+        <div id="browse-list"></div>
+    </div>
+</div>
+
+<!-- TAB 3: PROFILE -->
+<div id="tab-profile" class="tab-content">
+    <header><div class="header-title">My Progress</div></header>
+    <div class="scroll-area">
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <div style="flex:1; background:var(--success); padding:20px; border-radius:16px; text-align:center; color:#000;">
+                <div style="font-size:32px; font-weight:800;" id="stat-mastered">0</div>
+                <div style="font-size:12px; font-weight:600;">MASTERED</div>
             </div>
-            <button onclick="resetAll()" style="width:100%; padding:15px; background:var(--error); border:none; border-radius:12px; color:white;">Reset Progress</button>
+            <div style="flex:1; background:#333; padding:20px; border-radius:16px; text-align:center;">
+                <div style="font-size:32px; font-weight:800;" id="stat-left">0</div>
+                <div style="font-size:12px; font-weight:600; opacity:0.7;">LEFT</div>
+            </div>
         </div>
+        <button onclick="resetAll()" style="width:100%; padding:15px; background:var(--error); border:none; border-radius:12px; color:white;">Reset Progress</button>
     </div>
 </div>
 
@@ -526,6 +532,7 @@ function openModal(id) {
         <div class="question">${q.q}</div>
         <div class="options">`;
     q.options.forEach((opt, i) => {
+        // In review mode, show answer immediately? Or let them tap? Let's let them tap.
         html += `<button class="btn" onclick="checkAnswer(this, ${i}, ${q.ansIdx})">${opt}</button>`;
     });
     html += `</div><div style="margin-top:15px; text-align:center; font-size:12px; opacity:0.5;">Tap outside to close</div></div>`;
