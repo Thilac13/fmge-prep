@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FMGE Revision</title>
+    <style>
+        :root {
+            --bg: #000;
+            --card-bg: #1c1c1e;
+            --text: #fff;
+            --accent: #0A84FF;
+            --success: #30D158;
+            --error: #FF453A;
+            --sub: #8E8E93;
+        }
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0; padding: 0; height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        #header {
+            padding: 15px; text-align: center; border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        #progress { font-size: 14px; color: var(--sub); font-variant-numeric: tabular-nums; }
+        #container {
+            flex: 1; position: relative; display: flex;
+            justify-content: center; align-items: center; overflow: hidden;
+        }
+        .card {
+            width: 90%; max-width: 400px; height: 70vh;
+            background: var(--card-bg); border-radius: 20px;
+            position: absolute; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; padding: 20px;
+            box-sizing: border-box; transition: transform 0.3s ease, opacity 0.3s ease;
+            backface-visibility: hidden;
+        }
+        .question { font-size: 20px; font-weight: 600; margin-bottom: 20px; line-height: 1.4; }
+        .options { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+        .btn {
+            padding: 15px; background: #2C2C2E; border: none; border-radius: 12px;
+            color: var(--text); text-align: left; font-size: 16px; cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn.correct { background: var(--success) !important; color: #000; font-weight: bold; }
+        .btn.wrong { background: var(--error) !important; opacity: 0.6; }
+        
+        #controls {
+            padding: 20px; display: flex; justify-content: space-around;
+            background: var(--bg); padding-bottom: 40px;
+        }
+        .ctrl-btn {
+            background: none; border: 1px solid #333; color: var(--accent);
+            padding: 10px 20px; border-radius: 20px; font-size: 16px;
+        }
+        .mastered-badge {
+            position: absolute; top: 10px; right: 10px; 
+            background: var(--success); color: #000; padding: 4px 8px; 
+            border-radius: 4px; font-size: 10px; display: none;
+        }
+        
+        /* Animation States */
+        .hidden { display: none !important; }
+        .slide-left { transform: translateX(-120%) rotate(-10deg); opacity: 0; }
+        .slide-right { transform: translateX(120%) rotate(10deg); opacity: 0; }
+        
+        #end-screen { text-align: center; padding: 40px; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="header">
+    <span onclick="resetApp()" style="color:var(--error); font-size:12px;">Reset</span>
+    <span style="font-weight:bold;">FMGE 2026</span>
+    <span id="progress">0 / 0</span>
+</div>
+
+<div id="container">
+    <div id="card-stack"></div>
+    <div id="end-screen">
+        <h2>🎉 All Caught Up!</h2>
+        <p>You have reviewed all active cards.</p>
+        <button class="ctrl-btn" onclick="resetApp()">Restart All</button>
+    </div>
+</div>
+
+<div id="controls">
+    <button class="ctrl-btn" onclick="masterCard()">Mark Mastered</button>
+    <button class="ctrl-btn" onclick="nextCard()">Skip / Next</button>
+</div>
+
+<script>
+    // Embed Data from Python
+    const db = [{"q": "ST-elevation in leads II, III, and aVF. Which artery is occluded?", "options": ["LAD", "LCx", "Right Coronary Artery (RCA)", "Left Main"], "correct": "C", "ansIdx": 2}, {"q": "Tall tented T-waves, K+ 7.2. First step?", "options": ["Insulin + Dextrose", "IV Calcium Gluconate", "Salbutamol", "Dialysis"], "correct": "B", "ansIdx": 1}, {"q": "TB patient on ATT, tingling/numbness. Deficiency of?", "options": ["Vit B1", "Vit B3", "Vit B6 (Pyridoxine)", "Vit B12"], "correct": "C", "ansIdx": 2}, {"q": "Max time window for IV Thrombolysis in stroke?", "options": ["3 hours", "4.5 hours", "6 hours", "12 hours"], "correct": "B", "ansIdx": 1}, {"q": "Fruity breath, Kussmaul breathing, Sugar 450. Diagnosis?", "options": ["HHS", "Diabetic Ketoacidosis (DKA)", "Lactic Acidosis", "Hypoglycemia"], "correct": "B", "ansIdx": 1}, {"q": "Murmur best heard in left lateral decubitus with bell?", "options": ["Aortic Stenosis", "Mitral Stenosis", "Mitral Regurgitation", "Pulmonary Stenosis"], "correct": "B", "ansIdx": 1}, {"q": "Cannon a-waves in JVP. Sign of?", "options": ["AFib", "Complete Heart Block (3rd Degree)", "Tamponade", "TR"], "correct": "B", "ansIdx": 1}, {"q": "DOC for hyperthyroidism in 1st trimester pregnancy?", "options": ["Methimazole", "Propylthiouracil (PTU)", "Carbimazole", "Radioactive Iodine"], "correct": "B", "ansIdx": 1}, {"q": "Triad of Wernicke's: Confusion, Ataxia, and?", "options": ["Ophthalmoplegia", "Seizures", "Diarrhea", "Dermatitis"], "correct": "A", "ansIdx": 0}, {"q": "Male, morning back pain improves with exercise, HLA-B27+. Diagnosis?", "options": ["RA", "OA", "Ankylosing Spondylitis", "Psoriatic Arthritis"], "correct": "C", "ansIdx": 2}, {"q": "Hallmark finding in Nephrotic Syndrome?", "options": ["Hematuria", "Proteinuria (>3.5g/day)", "Hypertension", "Oliguria"], "correct": "B", "ansIdx": 1}, {"q": "Thunderclap headache investigation of choice?", "options": ["MRI", "NCCT Head", "LP", "EEG"], "correct": "B", "ansIdx": 1}, {"q": "C-ANCA positivity is associated with?", "options": ["Wegener's (GPA)", "Churg-Strauss", "Microscopic Polyangiitis", "SLE"], "correct": "A", "ansIdx": 0}, {"q": "Most common cause of Community-Acquired Pneumonia?", "options": ["Strep pneumoniae", "Mycoplasma", "Staph aureus", "Klebsiella"], "correct": "A", "ansIdx": 0}, {"q": "Currant Jelly Sputum is seen in?", "options": ["Pneumococcus", "Klebsiella pneumoniae", "Pseudomonas", "Mycoplasma"], "correct": "B", "ansIdx": 1}, {"q": "Anti-tubercular drug causing Red-Green color blindness?", "options": ["Isoniazid", "Rifampicin", "Ethambutol", "Pyrazinamide"], "correct": "C", "ansIdx": 2}, {"q": "Immediate management of Tension Pneumothorax?", "options": ["Needle Decompression", "Wait for CXR", "Antibiotics", "Intubation"], "correct": "A", "ansIdx": 0}, {"q": "DOC for absence seizures in a child?", "options": ["Phenytoin", "Carbamazepine", "Ethosuximide", "Gabapentin"], "correct": "C", "ansIdx": 2}, {"q": "Tram-track appearance on CT Head seen in?", "options": ["Sturge-Weber Syndrome", "Tuberous Sclerosis", "Neurofibromatosis", "VHL"], "correct": "A", "ansIdx": 0}, {"q": "Beck's Triad: Hypotension, Muffled Sounds, and?", "options": ["Raised JVP", "Bradycardia", "Pulm Edema", "Wheeze"], "correct": "A", "ansIdx": 0}, {"q": "Scoring system for Acute Pancreatitis severity?", "options": ["Ranson's Criteria", "Child-Pugh", "Gleason", "Wells"], "correct": "A", "ansIdx": 0}, {"q": "Drug of choice for MRSA?", "options": ["Amoxicillin", "Ceftriaxone", "Vancomycin", "Azithromycin"], "correct": "C", "ansIdx": 2}, {"q": "Which Hepatitis virus is DNA based?", "options": ["Hep A", "Hep B", "Hep C", "Hep E"], "correct": "B", "ansIdx": 1}, {"q": "Rice water stools are characteristic of?", "options": ["Typhoid", "Cholera", "Shigellosis", "Amoebiasis"], "correct": "B", "ansIdx": 1}, {"q": "Antidote for Paracetamol poisoning?", "options": ["Atropine", "N-Acetylcysteine (NAC)", "Flumazenil", "Naloxone"], "correct": "B", "ansIdx": 1}, {"q": "Serum marker for Hepatocellular Carcinoma?", "options": ["CEA", "CA-125", "Alpha-Fetoprotein (AFP)", "CA 19-9"], "correct": "C", "ansIdx": 2}, {"q": "Typical ECG finding in Hypokalemia?", "options": ["Tall T", "U waves", "Short QT", "Wide QRS"], "correct": "B", "ansIdx": 1}, {"q": "Mask-like face and Pill-rolling tremor seen in?", "options": ["Parkinson's Disease", "Alzheimer's", "Huntington's", "Wilson's"], "correct": "A", "ansIdx": 0}, {"q": "MC opportunistic infection in HIV in India?", "options": ["PCP", "Tuberculosis", "Candida", "Toxo"], "correct": "B", "ansIdx": 1}, {"q": "Drug of choice for Scrub Typhus?", "options": ["Penicillin", "Doxycycline", "Ceftriaxone", "Metronidazole"], "correct": "B", "ansIdx": 1}, {"q": "GCS: Eyes open to pain (2), Inappropriate words (3), Localizes pain (5). Total?", "options": ["10", "12", "8", "9"], "correct": "A", "ansIdx": 0}, {"q": "Most common type of Thyroid Carcinoma?", "options": ["Follicular", "Papillary", "Medullary", "Anaplastic"], "correct": "B", "ansIdx": 1}, {"q": "Orphan Annie Eye nuclei are seen in?", "options": ["Papillary Thyroid Ca", "Follicular Ca", "Medullary Ca", "Hashimoto's"], "correct": "A", "ansIdx": 0}, {"q": "Fluid resuscitation formula for burns?", "options": ["Parkland Formula", "Rule of Nines", "Holliday-Segar", "Brooke"], "correct": "A", "ansIdx": 0}, {"q": "Nerve injured in mid-shaft humerus fracture?", "options": ["Median", "Ulnar", "Radial Nerve", "Axillary"], "correct": "C", "ansIdx": 2}, {"q": "Investigation of choice for solitary thyroid nodule?", "options": ["USG", "FNAC", "Scan", "CT"], "correct": "B", "ansIdx": 1}, {"q": "Bird's Beak appearance on Barium Swallow?", "options": ["Achalasia Cardia", "Ca Esophagus", "GERD", "Zenker's"], "correct": "A", "ansIdx": 0}, {"q": "Murphy's Sign is positive in?", "options": ["Appendicitis", "Acute Cholecystitis", "Pancreatitis", "Renal Colic"], "correct": "B", "ansIdx": 1}, {"q": "Most common site for Ca Stomach?", "options": ["Fundus", "Body", "Antrum", "Cardia"], "correct": "C", "ansIdx": 2}, {"q": "Triple Assessment for Breast lump: Clinical, Imaging, and?", "options": ["MRI", "Pathology (FNAC/Biopsy)", "Markers", "PET"], "correct": "B", "ansIdx": 1}, {"q": "Hernia medial to inferior epigastric vessels?", "options": ["Direct Inguinal", "Indirect Inguinal", "Femoral", "Spigelian"], "correct": "A", "ansIdx": 0}, {"q": "Coffee bean sign on X-ray Abdomen?", "options": ["Sigmoid Volvulus", "Cecal Volvulus", "Intussusception", "Obstruction"], "correct": "A", "ansIdx": 0}, {"q": "Management of Tension Pneumothorax is immediate?", "options": ["CXR", "Needle Thoracostomy", "CT", "Intubation"], "correct": "B", "ansIdx": 1}, {"q": "Electrolyte abnormality causing Paralytic Ileus?", "options": ["Hyperkalemia", "Hypokalemia", "Hyponatremia", "Hypercalcemia"], "correct": "B", "ansIdx": 1}, {"q": "MC cause of Appendicitis in children?", "options": ["Fecalith", "Lymphoid Hyperplasia", "Worms", "Tumor"], "correct": "B", "ansIdx": 1}, {"q": "Sausage-shaped mass and Red Currant Jelly stool?", "options": ["Intussusception", "Volvulus", "Meckel's", "Pyloric Stenosis"], "correct": "A", "ansIdx": 0}, {"q": "Courvoisier's Law: Palpable, non-tender GB with jaundice is NOT?", "options": ["Ca Head Pancreas", "Periampullary Ca", "Gallstones", "Cholangiocarcinoma"], "correct": "C", "ansIdx": 2}, {"q": "MC organ injured in blunt abdominal trauma?", "options": ["Liver", "Spleen", "Kidney", "Intestine"], "correct": "B", "ansIdx": 1}, {"q": "Best prognostic factor in Breast Carcinoma?", "options": ["Size", "Axillary Lymph Node Status", "Grade", "Receptors"], "correct": "B", "ansIdx": 1}, {"q": "Sentinel Loop on X-ray is a sign of?", "options": ["Acute Pancreatitis", "Cholecystitis", "Appendicitis", "Diverticulitis"], "correct": "A", "ansIdx": 0}, {"q": "Eburnation of bone is a feature of?", "options": ["RA", "Osteoarthritis", "Gout", "Septic Arthritis"], "correct": "B", "ansIdx": 1}, {"q": "MC bone tumor in children?", "options": ["Osteosarcoma", "Ewing's", "Osteochondroma", "Chondrosarcoma"], "correct": "A", "ansIdx": 0}, {"q": "Onion peel appearance on X-ray?", "options": ["Osteosarcoma", "Ewing's Sarcoma", "Osteoclastoma", "Multiple Myeloma"], "correct": "B", "ansIdx": 1}, {"q": "Trendelenburg test assesses?", "options": ["Varicose Veins", "DVT", "PAD", "Lymphedema"], "correct": "A", "ansIdx": 0}, {"q": "Charcot's Triad (Fever, Jaundice, RUQ Pain) seen in?", "options": ["Cholecystitis", "Ascending Cholangitis", "Hepatitis", "Pancreatitis"], "correct": "B", "ansIdx": 1}, {"q": "Investigation of choice for Renal Stones?", "options": ["X-ray", "USG", "NCCT KUB", "IVP"], "correct": "C", "ansIdx": 2}, {"q": "Wilms' Tumor associated with chromosome deletion?", "options": ["11p13", "13q14", "17p", "22q"], "correct": "A", "ansIdx": 0}, {"q": "MC complication of peptic ulcer disease?", "options": ["Bleeding", "Perforation", "Obstruction", "Malignancy"], "correct": "A", "ansIdx": 0}, {"q": "Treatment for Category III dog bite?", "options": ["Vaccine only", "Vaccine + Immunoglobulin", "Observe", "Antibiotics"], "correct": "B", "ansIdx": 1}, {"q": "GCS minimum and maximum scores?", "options": ["0-15", "3-15", "1-10", "3-10"], "correct": "B", "ansIdx": 1}, {"q": "MC cause of Postpartum Hemorrhage (PPH)?", "options": ["Atonic Uterus", "Trauma", "Coagulopathy", "Placenta"], "correct": "A", "ansIdx": 0}, {"q": "Drug of choice for AMTSL?", "options": ["Oxytocin", "Methergine", "Carboprost", "Misoprostol"], "correct": "A", "ansIdx": 0}, {"q": "Ischial Spines (Station 0) is landmark for?", "options": ["Engagement", "Dilatation", "Flexion", "Lie"], "correct": "A", "ansIdx": 0}, {"q": "Partograph Alert Line starts at cervical dilation of?", "options": ["3 cm", "4 cm", "6 cm", "10 cm"], "correct": "B", "ansIdx": 1}, {"q": "Red Degeneration of Fibroid occurs in?", "options": ["Hyaline", "Pregnancy", "Calcific", "Cystic"], "correct": "B", "ansIdx": 1}, {"q": "Snowstorm appearance on USG?", "options": ["Vesicular Mole", "Ectopic", "Abortion", "Fibroid"], "correct": "A", "ansIdx": 0}, {"q": "Drug of choice for Eclampsia?", "options": ["Diazepam", "Phenytoin", "Magnesium Sulfate", "Labetalol"], "correct": "C", "ansIdx": 2}, {"q": "Earliest sign of MgSO4 toxicity?", "options": ["Resp Depression", "Loss of Knee Jerk", "Oliguria", "Cardiac Arrest"], "correct": "B", "ansIdx": 1}, {"q": "Screening test of choice for Ca Cervix?", "options": ["Pap Smear", "Colposcopy", "VIA", "Biopsy"], "correct": "A", "ansIdx": 0}, {"q": "MC site of Ectopic Pregnancy?", "options": ["Ampulla", "Isthmus", "Fimbria", "Ovary"], "correct": "A", "ansIdx": 0}, {"q": "Pearl Index measures?", "options": ["Contraceptive Efficacy", "Fertility", "MMR", "PMR"], "correct": "A", "ansIdx": 0}, {"q": "Absolute contraindication for OCPs?", "options": ["History of Thromboembolism", "Dysmenorrhea", "Acne", "PCOD"], "correct": "A", "ansIdx": 0}, {"q": "Ideal time for IUCD insertion after delivery?", "options": ["Within 48h or >6wks", "2wks", "3wks", "4wks"], "correct": "A", "ansIdx": 0}, {"q": "Strawberry Cervix is seen in?", "options": ["Candida", "Trichomoniasis", "BV", "Gonorrhea"], "correct": "B", "ansIdx": 1}, {"q": "Whiff test positive in?", "options": ["Bacterial Vaginosis", "Candida", "Trichomoniasis", "Chlamydia"], "correct": "A", "ansIdx": 0}, {"q": "MC cause of secondary amenorrhea?", "options": ["PCOS", "Pregnancy", "Thyroid", "Prolactinoma"], "correct": "B", "ansIdx": 1}, {"q": "Chocolate Cyst seen in?", "options": ["Endometriosis", "Dermoid", "PCOD", "Serous Cystadenoma"], "correct": "A", "ansIdx": 0}, {"q": "Vaccine contraindicated in pregnancy?", "options": ["Tetanus", "Flu", "Rubella", "Hep B"], "correct": "C", "ansIdx": 2}, {"q": "Hormone responsible for ovulation surge?", "options": ["FSH", "LH", "Estrogen", "Progesterone"], "correct": "B", "ansIdx": 1}, {"q": "MC type of ovarian cancer?", "options": ["Serous Cystadenocarcinoma", "Mucinous", "Endometrioid", "Brenner"], "correct": "A", "ansIdx": 0}, {"q": "Curd-like/Cottage cheese discharge seen in?", "options": ["Candidiasis", "Trichomoniasis", "BV", "Gonorrhea"], "correct": "A", "ansIdx": 0}, {"q": "Late deceleration on CTG indicates?", "options": ["Head compression", "Utero-placental insufficiency", "Cord compression", "Normal"], "correct": "B", "ansIdx": 1}, {"q": "Variable deceleration on CTG indicates?", "options": ["Head compression", "Insufficiency", "Cord compression", "Sleep"], "correct": "C", "ansIdx": 2}, {"q": "Bishop's Score is used for?", "options": ["Inducibility of Labor", "Fetal Well-being", "Gestational Age", "PPH Risk"], "correct": "A", "ansIdx": 0}, {"q": "Min number of Antenatal Visits (WHO/GoI)?", "options": ["4", "3", "6", "8"], "correct": "A", "ansIdx": 0}, {"q": "Dose of Anti-D Ig for Rh- mom after Rh+ baby?", "options": ["100 mcg", "300 mcg", "500 mcg", "50 mcg"], "correct": "B", "ansIdx": 1}, {"q": "Maneuver for Shoulder Dystocia?", "options": ["McRoberts", "Ritgen", "Leopold", "Valsalva"], "correct": "A", "ansIdx": 0}, {"q": "MC cause of VVF in developing countries?", "options": ["Obstructed Labor", "Surgery", "Radiation", "Trauma"], "correct": "A", "ansIdx": 0}, {"q": "Twin Peak sign (Lambda) indicates?", "options": ["Dichorionic Diamniotic", "MCDA", "MCMA", "Conjoined"], "correct": "A", "ansIdx": 0}, {"q": "Management of molar pregnancy?", "options": ["Suction Evacuation", "Hysterectomy", "Methotrexate", "Induction"], "correct": "A", "ansIdx": 0}, {"q": "Vaccine stored in freezer (-15 to -25C)?", "options": ["DPT", "Polio (OPV)", "Hep B", "Pentavalent"], "correct": "B", "ansIdx": 1}, {"q": "Most heat-sensitive vaccine?", "options": ["OPV", "BCG", "TT", "Hep B"], "correct": "A", "ansIdx": 0}, {"q": "Most heat-resistant vaccine?", "options": ["OPV", "Measles", "Tetanus Toxoid (TT)", "DPT"], "correct": "C", "ansIdx": 2}, {"q": "Human Anatomical Waste bag color?", "options": ["Yellow", "Red", "White", "Blue"], "correct": "A", "ansIdx": 0}, {"q": "Sharps/Needles container color?", "options": ["Yellow", "Red", "White (Puncture Proof)", "Blue"], "correct": "C", "ansIdx": 2}, {"q": "Plastic waste (IV sets, gloves) bag color?", "options": ["Yellow", "Red", "White", "Blue"], "correct": "B", "ansIdx": 1}, {"q": "Denominator for MMR?", "options": ["Population", "100,000 Live Births", "1,000 Live Births", "Women 15-49"], "correct": "B", "ansIdx": 1}, {"q": "Best indicator of health service effectiveness?", "options": ["IMR", "MMR", "CDR", "Life Expectancy"], "correct": "A", "ansIdx": 0}, {"q": "Vit A prophylaxis dose at 9 months?", "options": ["100,000 IU", "200,000 IU", "50,000 IU", "10,000 IU"], "correct": "A", "ansIdx": 0}, {"q": "Koplik's Spots seen in?", "options": ["Measles", "Chickenpox", "Rubella", "Mumps"], "correct": "A", "ansIdx": 0}, {"q": "Vector for Dengue/Chikungunya?", "options": ["Aedes aegypti", "Anopheles", "Culex", "Mansonia"], "correct": "A", "ansIdx": 0}, {"q": "Vector for Japanese Encephalitis?", "options": ["Aedes", "Anopheles", "Culex tritaeniorhynchus", "Sandfly"], "correct": "C", "ansIdx": 2}, {"q": "Vector for Kala-Azar?", "options": ["Sandfly", "Tsetse", "Housefly", "Mosquito"], "correct": "A", "ansIdx": 0}, {"q": "Step-ladder fever pattern seen in?", "options": ["Malaria", "Typhoid", "Dengue", "Pneumonia"], "correct": "B", "ansIdx": 1}, {"q": "Study design: Effect to Cause?", "options": ["Cohort", "Case-Control", "RCT", "Cross-sectional"], "correct": "B", "ansIdx": 1}, {"q": "Relative Risk (RR) calculated in?", "options": ["Cohort", "Case-Control", "Cross-sectional", "Ecological"], "correct": "A", "ansIdx": 0}, {"q": "Odds Ratio (OR) calculated in?", "options": ["Cohort", "Case-Control", "RCT", "Ecological"], "correct": "B", "ansIdx": 1}, {"q": "Which is a Live vaccine?", "options": ["BCG", "DPT", "Hep B", "IPV"], "correct": "A", "ansIdx": 0}, {"q": "Shake test checks for?", "options": ["Potency", "Frozen damage", "Contamination", "VVM"], "correct": "B", "ansIdx": 1}, {"q": "Vision 2020 goal for blindness prevalence?", "options": ["1%", "0.3%", "0.5%", "0.1%"], "correct": "B", "ansIdx": 1}, {"q": "MC cause of blindness in India?", "options": ["Refractive Error", "Cataract", "Glaucoma", "Vit A def"], "correct": "B", "ansIdx": 1}, {"q": "3 Ds of Pellagra: Dermatitis, Diarrhea, and?", "options": ["Dementia", "Death", "Deafness", "Dysphagia"], "correct": "A", "ansIdx": 0}, {"q": "Pellagra is deficiency of?", "options": ["Thiamine", "Riboflavin", "Niacin (B3)", "Pyridoxine"], "correct": "C", "ansIdx": 2}, {"q": "IDD control program monitors?", "options": ["Urine Iodine & TSH", "Serum Iodine", "Thyroid size", "Goiter"], "correct": "A", "ansIdx": 0}, {"q": "Incubation period of Measles?", "options": ["10-14 days", "2-3 days", "20-30 days", "1-2 days"], "correct": "A", "ansIdx": 0}, {"q": "Herd Immunity not applicable for?", "options": ["Polio", "Measles", "Tetanus", "Diphtheria"], "correct": "C", "ansIdx": 2}, {"q": "JSY promotes?", "options": ["Institutional Deliveries", "Family Planning", "Adolescent Health", "Nutrition"], "correct": "A", "ansIdx": 0}, {"q": "ASHA worker is at which level?", "options": ["Village (1/1000)", "Sub-center", "PHC", "CHC"], "correct": "A", "ansIdx": 0}, {"q": "Quarantine is applied to?", "options": ["Infected", "Healthy contacts", "Animals", "Vectors"], "correct": "B", "ansIdx": 1}, {"q": "Isolation is applied to?", "options": ["Cases (Infected)", "Healthy contacts", "Travelers", "Immune"], "correct": "A", "ansIdx": 0}];
+    
+    let activeQueue = [];
+    let currentIndex = 0;
+    
+    // Load state
+    let mastered = JSON.parse(localStorage.getItem('fmge_mastered') || '[]');
+
+    function init() {
+        // Filter out mastered questions
+        activeQueue = db.filter((_, idx) => !mastered.includes(idx));
+        
+        // Shuffle queue
+        activeQueue.sort(() => Math.random() - 0.5);
+        
+        if(activeQueue.length === 0) {
+            document.getElementById('end-screen').style.display = 'block';
+            document.getElementById('card-stack').style.display = 'none';
+        } else {
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('card-stack').style.display = 'block';
+            renderCard();
+        }
+        updateProgress();
+    }
+
+    function renderCard() {
+        const stack = document.getElementById('card-stack');
+        stack.innerHTML = '';
+        
+        if (currentIndex >= activeQueue.length) {
+            init(); // Re-shuffle or end
+            return;
+        }
+
+        const qData = activeQueue[currentIndex];
+        const card = document.createElement('div');
+        card.className = 'card';
+        
+        let html = `<div class="question">${qData.q}</div><div class="options">`;
+        
+        qData.options.forEach((opt, i) => {
+            html += `<button class="btn" onclick="checkAnswer(this, ${i}, ${qData.ansIdx})">${opt}</button>`;
+        });
+        
+        html += `</div>`;
+        card.innerHTML = html;
+        stack.appendChild(card);
+    }
+
+    function checkAnswer(btn, selected, correct) {
+        const parent = btn.parentElement;
+        const buttons = parent.getElementsByClassName('btn');
+        
+        // Disable all
+        for(let b of buttons) b.disabled = true;
+        
+        if(selected === correct) {
+            btn.classList.add('correct');
+        } else {
+            btn.classList.add('wrong');
+            buttons[correct].classList.add('correct');
+        }
+        
+        // Auto advance
+        setTimeout(() => {
+            nextCard();
+        }, 1500);
+    }
+
+    function nextCard() {
+        const card = document.querySelector('.card');
+        if(card) {
+            card.classList.add('slide-left');
+            setTimeout(() => {
+                currentIndex++;
+                renderCard();
+                updateProgress();
+            }, 250);
+        }
+    }
+    
+    function masterCard() {
+        // Add current REAL index to mastered list
+        const qData = activeQueue[currentIndex];
+        // Find original index
+        const originalIdx = db.findIndex(x => x.q === qData.q);
+        
+        if(!mastered.includes(originalIdx)) {
+            mastered.push(originalIdx);
+            localStorage.setItem('fmge_mastered', JSON.stringify(mastered));
+        }
+        
+        const card = document.querySelector('.card');
+        card.classList.add('slide-right'); // Swipe right for mastered
+        setTimeout(() => {
+            currentIndex++;
+            renderCard();
+            updateProgress();
+        }, 250);
+    }
+
+    function updateProgress() {
+        const total = db.length;
+        const done = mastered.length;
+        const remaining = activeQueue.length - currentIndex;
+        document.getElementById('progress').innerText = `${done} Mastered | ${remaining} Queue`;
+    }
+    
+    function resetApp() {
+        if(confirm("Reset all progress?")) {
+            localStorage.removeItem('fmge_mastered');
+            mastered = [];
+            currentIndex = 0;
+            init();
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>

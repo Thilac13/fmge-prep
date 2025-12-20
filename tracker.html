@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FMGE Dec 2025 Tracker</title>
+    <style>
+        :root {
+            --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-primary: #000000;
+            --text-secondary: #8E8E93;
+            --accent: #007AFF;
+            --danger: #FF3B30;
+            --success: #34C759;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --card-bg: #1C1C1E;
+                --text-primary: #FFFFFF;
+                --text-secondary: #8E8E93;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        h1, h2 { margin-top: 0; }
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .highlight { color: var(--danger); font-weight: bold; }
+        .date-badge { 
+            background: var(--accent); color: white; 
+            padding: 2px 8px; border-radius: 6px; font-size: 0.9em;
+        }
+        
+        /* Checklist Styles */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--bg-color);
+        }
+        .checklist-item:last-child { border-bottom: none; }
+        
+        input[type="checkbox"] {
+            transform: scale(1.5);
+            margin-right: 15px;
+            accent-color: var(--accent);
+        }
+        
+        label { flex-grow: 1; cursor: pointer; }
+        .completed label { text-decoration: line-through; color: var(--text-secondary); }
+
+        .progress-bar {
+            height: 10px;
+            background-color: var(--bg-color);
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="card" style="text-align: center;">
+        <h1>FMGE Dec 2025</h1>
+        <p style="font-size: 1.2em; color: var(--text-secondary);">Target: Jan 17, 2026</p>
+        <div id="countdown" style="font-weight: bold; font-size: 1.5em; color: var(--accent);"></div>
+    </div>
+
+    <div class="card">
+        <h2>🚨 Critical Dates</h2>
+        <p><strong>Dec 29 - 31:</strong> <span class="highlight">Final Edit Window</span> (Images Only)</p>
+        <p><strong>Jan 02:</strong> City Intimation</p>
+        <p><strong>Jan 14:</strong> Admit Card</p>
+        <p><strong>Jan 17:</strong> Exam Day</p>
+    </div>
+
+    <div class="card">
+        <h2>⚖️ Weightage (Big 4)</h2>
+        <ul style="padding-left: 20px;">
+            <li><strong>Medicine:</strong> ~33 Marks</li>
+            <li><strong>Surgery:</strong> ~32 Marks</li>
+            <li><strong>OBG:</strong> ~30 Marks</li>
+            <li><strong>PSM:</strong> ~30 Marks</li>
+        </ul>
+        <p style="font-size: 0.9em; color: var(--text-secondary);">Pass Score: 150/300</p>
+    </div>
+
+    <div class="card">
+        <h2>⚡ Daily Routine (Fast Switch)</h2>
+        <p><strong>08:00 - 10:00:</strong> Deep Work (Concepts)</p>
+        <p><strong>10:30 - 12:30:</strong> MCQ Solving (Active)</p>
+        <p><strong>14:00 - 16:00:</strong> Short Subject (Switch)</p>
+        <p><strong>16:30 - 18:30:</strong> PYQ Review</p>
+        <p><strong>20:00 - 22:00:</strong> Volatile Cramming</p>
+    </div>
+
+    <div class="card">
+        <h2>📅 28-Day Sprint</h2>
+        <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+        <p style="text-align: right; font-size: 0.8em;" id="progressText">0% Complete</p>
+        
+        <div id="checklist">
+            <h3 style="margin-top:20px;">Phase 1: High Yields</h3>
+            <div class="checklist-item"><input type="checkbox" id="d1"><label for="d1">Dec 21: OBG (Labor, Contraception)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d2"><label for="d2">Dec 22: OBG (PPH, Gynae Onc)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d3"><label for="d3">Dec 23: PSM (Epidemiology, Biostats)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d4"><label for="d4">Dec 24: PSM (Vaccines, Programs)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d5"><label for="d5">Dec 25: Surgery (Trauma, Acute Abdomen)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d6"><label for="d6">Dec 26: Surgery (Breast, Thyroid, GIT)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d7"><label for="d7">Dec 27: Surgery (Urology, Burns)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d8"><label for="d8">Dec 28: Medicine (CVS - ECG Focus)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d9"><label for="d9">Dec 29: Medicine (Neuro, CNS)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d10"><label for="d10">Dec 30: Medicine (Nephro, Resp)</label></div>
+
+            <h3 style="margin-top:20px;">Phase 2: Rapid Scoring</h3>
+            <div class="checklist-item"><input type="checkbox" id="d11"><label for="d11">Dec 31: Ophthalmology</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d12"><label for="d12">Jan 01: ENT</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d13"><label for="d13">Jan 02: Pathology + Pharma</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d14"><label for="d14">Jan 03: Microbiology</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d15"><label for="d15">Jan 04: FMT + Psychiatry</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d16"><label for="d16">Jan 05: Derma + Radiology</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d17"><label for="d17">Jan 06: Biochem</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d18"><label for="d18">Jan 07: Anatomy</label></div>
+
+            <h3 style="margin-top:20px;">Phase 3: Final Drill</h3>
+            <div class="checklist-item"><input type="checkbox" id="d19"><label for="d19">Jan 08: Grand Test 1 + Analysis</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d20"><label for="d20">Jan 09: Grand Test 2 + Analysis</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d21"><label for="d21">Jan 10: Grand Test 3 + Analysis</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d22"><label for="d22">Jan 11: Grand Test 4 + Analysis</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d23"><label for="d23">Jan 12: Grand Test 5 + Analysis</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d24"><label for="d24">Jan 13: PYQ Marathon (2023)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d25"><label for="d25">Jan 14: PYQ Marathon (2024)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d26"><label for="d26">Jan 15: PYQ Marathon (2025)</label></div>
+            <div class="checklist-item"><input type="checkbox" id="d27"><label for="d27">Jan 16: Image Revision Only</label></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 1. Countdown Logic
+    const examDate = new Date("Jan 17, 2026 09:00:00").getTime();
+    const timer = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = examDate - now;
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        document.getElementById("countdown").innerHTML = days + " Days Left";
+    }, 1000);
+
+    // 2. Checkbox Persistence (LocalStorage)
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    
+    function updateProgress() {
+        const total = checkboxes.length;
+        const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+        const pct = Math.round((checked / total) * 100);
+        document.getElementById('progressBar').style.width = pct + "%";
+        document.getElementById('progressText').innerText = pct + "% Complete";
+    }
+
+    checkboxes.forEach(box => {
+        // Load saved state
+        const savedState = localStorage.getItem(box.id);
+        if (savedState === 'true') {
+            box.checked = true;
+            box.parentElement.classList.add('completed');
+        }
+
+        // Add event listener
+        box.addEventListener('change', function() {
+            localStorage.setItem(this.id, this.checked);
+            if(this.checked) {
+                this.parentElement.classList.add('completed');
+            } else {
+                this.parentElement.classList.remove('completed');
+            }
+            updateProgress();
+        });
+    });
+    
+    // Initial update
+    updateProgress();
+</script>
+
+</body>
+</html>
