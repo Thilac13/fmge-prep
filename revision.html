@@ -10,6 +10,11 @@
     <meta name="apple-mobile-web-app-title" content="FMGE Revision">
     <meta name="theme-color" content="#0F2027">
     
+    <!-- Prevent Caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
     <title>FMGE Ultimate Revision</title>
     <style>
         :root {
@@ -224,6 +229,16 @@
         }
 
         #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 500; }
+        
+        /* REFRESH BTN */
+        .refresh-btn {
+            position: absolute; right: 20px; top: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff; width: 32px; height: 32px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -241,7 +256,7 @@
     <header>
         <div class="header-btn" onclick="window.location.href='index.html'">←</div>
         <div class="header-title">Subject Revision</div>
-        <div style="width: 30px;"></div>
+        <div class="refresh-btn" onclick="hardReload()">↻</div>
     </header>
     
     <div class="grid-container">
@@ -354,26 +369,20 @@
 <script>
     // GLOBAL STORE for loaded modules
     window.FMGE_DATA = {};
+    // Store content hash/length to detect changes
+    window.FMGE_META = JSON.parse(localStorage.getItem('fmge_meta_data') || '{}');
     
-    // --- LOAD MODULE LOGIC ---
-    window.registerSubject = function(name, data) {
-        console.log("Module Loaded:", name);
-        window.FMGE_DATA[name] = data;
-        
-        // Hide Loader
-        document.getElementById('loader-overlay').style.display = 'none';
-        
-        // Initialize the newly loaded subject
-        initializeSubject(name);
-    };
-
+    // --- LOAD MODULE LOGIC (CACHE BUSTING) ---
+    // This is the specific fix for your issue
     function loadScript(subject) {
         // Show Loader
         document.getElementById('loader-overlay').style.display = 'flex';
         
         const script = document.createElement('script');
-        // Construct filename: ENT -> questions_ent.js
-        script.src = `questions_${subject.toLowerCase()}.js`;
+        
+        // --- THE MAGIC FIX: ADD ?v=TIMESTAMP ---
+        const timestamp = new Date().getTime();
+        script.src = `questions_${subject.toLowerCase()}.js?v=${timestamp}`;
         
         script.onload = () => {
             // Script loaded successfully
@@ -386,6 +395,25 @@
         
         document.body.appendChild(script);
     }
+    
+    // --- Register Subject ---
+    window.registerSubject = function(name, data) {
+        console.log("Module Loaded:", name);
+        window.FMGE_DATA[name] = data;
+        
+        // Hide Loader
+        document.getElementById('loader-overlay').style.display = 'none';
+        
+        // Initialize the newly loaded subject
+        initializeSubject(name);
+    };
+
+    // --- Hard Reload ---
+    function hardReload() {
+        if(confirm("Force reload app?")) {
+            window.location.reload(true);
+        }
+    }
 
     // --- APP STATE ---
     let currentSubject = "";
@@ -395,11 +423,8 @@
 
     // --- INIT & NAVIGATION ---
     function selectSubject(subj) {
-        if (window.FMGE_DATA[subj]) {
-            initializeSubject(subj);
-        } else {
-            loadScript(subj);
-        }
+        // Always reload from file to ensure fresh data
+        loadScript(subj);
     }
 
     function initializeSubject(subj) {
@@ -407,6 +432,27 @@
         document.getElementById('deck-title').innerText = subj;
         
         const rawData = window.FMGE_DATA[subj];
+        
+        // --- VERSION CHECK LOGIC ---
+        // We use the length of the dataset as a simple hash to detect changes
+        const currentHash = rawData.length; 
+        const storedHash = window.FMGE_META[subj + '_len'];
+        
+        // If length changed significantly, it's likely a new file/test
+        // We check if we have progress AND if the file size changed
+        if (storedHash && storedHash !== currentHash && mastered[subj] && mastered[subj].length > 0) {
+            if(confirm(`New question bank detected for ${subj}!\n\nDo you want to reset your progress to start fresh?`)) {
+                mastered[subj] = [];
+                localStorage.setItem('fmge_mastered_subjects', JSON.stringify(mastered));
+            }
+        }
+        
+        // Update Meta Data
+        window.FMGE_META[subj + '_len'] = currentHash;
+        localStorage.setItem('fmge_meta_data', JSON.stringify(window.FMGE_META));
+        
+        
+        // Prepare Data
         const allAnswers = rawData.map(x => x.a);
         
         subjectData = rawData.map((item, idx) => {
@@ -432,7 +478,7 @@
 
             const ansIdx = finalOptions.indexOf(item.a);
             
-            // Safety Check: If answer missing from options (data error), force add it
+            // Safety Check
             if (ansIdx === -1) {
                  finalOptions[0] = item.a;
                  finalOptions.sort(() => Math.random() - 0.5); 
