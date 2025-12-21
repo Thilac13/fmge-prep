@@ -279,14 +279,21 @@
         <div class="grid">
             <div class="sub-card p2 locked"><div class="sub-name">Medicine</div><div class="sub-meta">33 Marks</div></div>
             <div class="sub-card p2 locked"><div class="sub-name">Surgery</div><div class="sub-meta">32 Marks</div></div>
-            <div class="sub-card p2 locked"><div class="sub-name">OBG</div><div class="sub-meta">30 Marks</div></div>
+            
+            <!-- ACTIVE OBG CARD -->
+            <div class="sub-card p2" onclick="selectSubject('OBG')">
+                <div class="ready-badge"></div>
+                <div class="sub-name">OBG</div>
+                <div class="sub-meta">30+ PYQs</div>
+            </div>
+            
             <div class="sub-card p2 locked"><div class="sub-name">PSM</div><div class="sub-meta">25 Marks</div></div>
             
             <!-- ACTIVE ENT CARD -->
             <div class="sub-card p2" onclick="selectSubject('ENT')">
                 <div class="ready-badge"></div>
                 <div class="sub-name">ENT</div>
-                <div class="sub-meta">150+ PYQs</div>
+                <div class="sub-meta">100</div>
             </div>
 
             <div class="sub-card p2 locked"><div class="sub-name">Ophthalmology</div><div class="sub-meta">15 Marks</div></div>
@@ -741,3 +748,4 @@
 </script>
 </body>
 </html>
+
