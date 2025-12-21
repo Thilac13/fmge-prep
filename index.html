@@ -16,6 +16,8 @@
             --bg-grad-mid: #203A43;
             --bg-grad-end: #2C5364;
             --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
         body {
             font-family: var(--font-main);
@@ -26,44 +28,90 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
         }
-        h1 { margin-bottom: 40px; font-weight: 800; letter-spacing: -1px; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h1 { 
+            margin-bottom: 40px; 
+            font-weight: 800; 
+            letter-spacing: -1px; 
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .menu-container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
         .menu-item {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--glass-bg);
             backdrop-filter: blur(10px);
-            width: 100%; max-width: 350px;
+            -webkit-backdrop-filter: blur(10px);
             padding: 24px;
-            margin-bottom: 20px;
             border-radius: 20px;
             text-decoration: none;
             color: #fff;
             display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.2s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            transition: transform 0.2s, background 0.2s;
         }
         .menu-item:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.2); }
         .icon { font-size: 28px; margin-right: 20px; }
-        .title { font-size: 18px; font-weight: 600; flex-grow: 1; }
+        .text-group { flex-grow: 1; }
+        .title { font-size: 18px; font-weight: 600; display: block; }
+        .subtitle { font-size: 12px; opacity: 0.6; display: block; margin-top: 4px; }
         .arrow { color: rgba(255,255,255,0.5); font-size: 20px; }
+        
+        /* New Badge */
+        .badge {
+            background: #00b09b;
+            color: #000;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
 
-    <h1>FMGE 2026 🇮🇳</h1>
+    <h1>FMGE 2026 🇮🇳<br><span style="font-size: 16px; opacity: 0.7; font-weight: 400;">Dr. Thilac's Dashboard</span></h1>
 
-    <a href="tracker.html" class="menu-item">
-        <span class="icon">📅</span>
-        <span class="title">Study Tracker</span>
-        <span class="arrow">›</span>
-    </a>
+    <div class="menu-container">
+        <!-- Tracker -->
+        <a href="tracker.html" class="menu-item">
+            <span class="icon">📅</span>
+            <div class="text-group">
+                <span class="title">Study Tracker</span>
+                <span class="subtitle">Countdown & Tasks</span>
+            </div>
+            <span class="arrow">›</span>
+        </a>
 
-    <a href="app.html" class="menu-item">
-        <span class="icon">🧠</span>
-        <span class="title">Revision Cards</span>
-        <span class="arrow">›</span>
-    </a>
+        <!-- New Revision Module -->
+        <a href="revision.html" class="menu-item" style="border-color: rgba(0, 176, 155, 0.5); background: rgba(0, 176, 155, 0.1);">
+            <span class="icon">⚡️</span>
+            <div class="text-group">
+                <span class="title">Subject Revision <span class="badge">NEW</span></span>
+                <span class="subtitle">Paper 1 & 2 Flashcards</span>
+            </div>
+            <span class="arrow">›</span>
+        </a>
+
+        <!-- Old Random MCQ App -->
+        <a href="app.html" class="menu-item">
+            <span class="icon">🧠</span>
+            <div class="text-group">
+                <span class="title">Random MCQs</span>
+                <span class="subtitle">Mixed Bag Practice</span>
+            </div>
+            <span class="arrow">›</span>
+        </a>
+    </div>
 
 </body>
 </html>
