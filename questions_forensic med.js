@@ -81,4 +81,5 @@ if (typeof window.registerSubject === 'function') {
         { q: "Paltauf's hemorrhages are seen in?", a: "Drowning (Lungs)", options: ["Hanging", "Drowning (Lungs)", "Strangulation", "Poisoning"] },
         { q: "Cutis anserina (Goosebumps) is seen in?", a: "Drowning / Rigor Mortis", options: ["Burns", "Drowning / Rigor Mortis", "Hanging", "Poisoning"] }
     ]);
+
 }
