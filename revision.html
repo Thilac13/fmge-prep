@@ -266,18 +266,49 @@
     <div class="grid-container">
         <div class="section-title" style="color: var(--paper1);">Paper 1: Pre & Para Clinical</div>
         <div class="grid">
-            <div class="sub-card p1 locked"><div class="sub-name">Anatomy</div><div class="sub-meta">17 Marks</div></div>
-            <div class="sub-card p1 locked"><div class="sub-name">Physiology</div><div class="sub-meta">17 Marks</div></div>
+            <!-- ANATOMY UNLOCKED -->
+            <div class="sub-card p1" onclick="selectSubject('Anatomy')">
+                <div class="ready-badge"></div>
+                <div class="sub-name">Anatomy</div>
+                <div class="sub-meta">17 Marks</div>
+            </div>
+
+            <!-- PHYSIOLOGY UNLOCKED -->
+            <div class="sub-card p1" onclick="selectSubject('Physiology')">
+                <div class="ready-badge"></div>
+                <div class="sub-name">Physiology</div>
+                <div class="sub-meta">17 Marks</div>
+            </div>
+
             <div class="sub-card p1 locked"><div class="sub-name">Biochemistry</div><div class="sub-meta">16 Marks</div></div>
-            <div class="sub-card p1 locked"><div class="sub-name">Pathology</div><div class="sub-meta">25 Marks</div></div>
-            <div class="sub-card p1 locked"><div class="sub-name">Microbiology</div><div class="sub-meta">25 Marks</div></div>
+            
+            <!-- PATHOLOGY UNLOCKED -->
+            <div class="sub-card p1" onclick="selectSubject('Pathology')">
+                <div class="ready-badge"></div>
+                <div class="sub-name">Pathology</div>
+                <div class="sub-meta">25 Marks</div>
+            </div>
+
+            <!-- MICROBIOLOGY UNLOCKED -->
+            <div class="sub-card p1" onclick="selectSubject('Microbiology')">
+                <div class="ready-badge"></div>
+                <div class="sub-name">Microbiology</div>
+                <div class="sub-meta">25 Marks</div>
+            </div>
+            
             <!-- PHARMACOLOGY UNLOCKED -->
             <div class="sub-card p1" onclick="selectSubject('Pharmacology')">
                 <div class="ready-badge"></div>
                 <div class="sub-name">Pharmacology</div>
                 <div class="sub-meta">25 Marks</div>
             </div>
-            <div class="sub-card p1 locked"><div class="sub-name">Forensic Med</div><div class="sub-meta">10 Marks</div></div>
+
+            <!-- FORENSIC MED UNLOCKED -->
+            <div class="sub-card p1" onclick="selectSubject('Forensic Med')">
+                <div class="ready-badge"></div>
+                <div class="sub-name">Forensic Med</div>
+                <div class="sub-meta">10 Marks</div>
+            </div>
         </div>
 
         <div class="section-title" style="color: var(--paper2); margin-top: 30px;">Paper 2: Clinical</div>
@@ -320,8 +351,19 @@
                 <div class="sub-meta">15 Marks</div>
             </div>
 
-            <div class="sub-card p2 locked"><div class="sub-name">Pediatrics</div><div class="sub-meta">15 Marks</div></div>
-            <div class="sub-card p2 locked"><div class="sub-name">Orthopedics</div><div class="sub-meta">5 Marks</div></div>
+            <!-- PEDIATRICS UNLOCKED -->
+            <div class="sub-card p2" onclick="selectSubject('Pediatrics')">
+                <div class="ready-badge"></div>
+                <div class="sub-name">Pediatrics</div>
+                <div class="sub-meta">15 Marks</div>
+            </div>
+
+            <!-- ORTHOPEDICS UNLOCKED -->
+            <div class="sub-card p2" onclick="selectSubject('Orthopedics')">
+                <div class="ready-badge"></div>
+                <div class="sub-name">Orthopedics</div>
+                <div class="sub-meta">5 Marks</div>
+            </div>
             
             <!-- RADIOLOGY UNLOCKED -->
             <div class="sub-card p2" onclick="selectSubject('Radiology')">
@@ -344,7 +386,12 @@
                 <div class="sub-meta">5 Marks</div>
             </div>
 
-            <div class="sub-card p2 locked"><div class="sub-name">Anesthesia</div><div class="sub-meta">5 Marks</div></div>
+            <!-- ANESTHESIA UNLOCKED -->
+            <div class="sub-card p2" onclick="selectSubject('Anesthesia')">
+                <div class="ready-badge"></div>
+                <div class="sub-name">Anesthesia</div>
+                <div class="sub-meta">5 Marks</div>
+            </div>
         </div>
         <div style="text-align: center; margin-top: 40px; opacity: 0.5; font-size: 12px;">More subjects soon...</div>
     </div>
@@ -790,5 +837,6 @@
 </script>
 </body>
 </html>
+
 
 
